@@ -133,7 +133,7 @@ def test_textbox_extraction(documents):
 
 
 def test_heading_levels(documents):
-    name = "word_sample.docx"
+    name = "test.docx"
     doc = next(item[1] for item in documents if item[0].name == name)
 
     found_lvl_1 = found_lvl_2 = False
