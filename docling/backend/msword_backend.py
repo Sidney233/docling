@@ -81,7 +81,7 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
 
     @override
     def __init__(
-        self, in_doc: "InputDocument", path_or_stream: Union[BytesIO, Path]
+            self, in_doc: "InputDocument", path_or_stream: Union[BytesIO, Path]
     ) -> None:
         """
         初始化 MsWordDocumentBackend 实例。
@@ -129,10 +129,10 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
 
         # 初始化处理历史记录
         self.history: dict[str, Any] = {
-            "names": [None],     # 样式名称历史
-            "levels": [None],    # 层级历史
-            "numids": [None],    # 列表编号ID历史
-            "indents": [None],   # 缩进级别历史
+            "names": [None],  # 样式名称历史
+            "levels": [None],  # 层级历史
+            "numids": [None],  # 列表编号ID历史
+            "indents": [None],  # 缩进级别历史
         }
 
         # 加载 DOCX 文件
@@ -221,7 +221,7 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
 
     @staticmethod
     def load_msword_file(
-        path_or_stream: Union[BytesIO, Path], document_hash: str
+            path_or_stream: Union[BytesIO, Path], document_hash: str
     ) -> DocxDocument:
         """
         加载 Microsoft Word 文档。
@@ -249,11 +249,11 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
             ) from e
 
     def _update_history(
-        self,
-        name: str,
-        level: Optional[int],
-        numid: Optional[int],
-        ilevel: Optional[int],
+            self,
+            name: str,
+            level: Optional[int],
+            numid: Optional[int],
+            ilevel: Optional[int],
     ):
         """
         更新处理历史记录。
@@ -321,10 +321,10 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
         return 0
 
     def _walk_linear(
-        self,
-        body: BaseOxmlElement,
-        doc: DoclingDocument,
-        # parent:
+            self,
+            body: BaseOxmlElement,
+            doc: DoclingDocument,
+            # parent:
     ) -> tuple[DoclingDocument, list[RefItem]]:
         """
         线性遍历文档元素。
@@ -341,15 +341,15 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
         """
         # 存储已处理的元素引用
         added_elements = []
-        
+
         # 遍历文档主体中的每一个元素
         for element in body:
             # 获取元素的标签名（去除命名空间前缀）
             tag_name = etree.QName(element).localname
-            
+
             # 检查是否存在内联图像（blip元素）
             drawing_blip = self.blip_xpath_expr(element)
-            
+
             # 查找所有绘图元素（用于处理DrawingML）
             drawingml_els = element.findall(
                 ".//w:drawing", namespaces=MsWordDocumentBackend._BLIP_NAMESPACES
@@ -431,31 +431,31 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
                 except Exception:
                     # 如果表格解析失败，记录调试信息
                     _log.debug("could not parse a table, broken docx table")
-                    
+
             # 检查图像元素
             elif drawing_blip:
                 # 处理图片元素
                 pics = self._handle_pictures(drawing_blip, doc)
                 added_elements.extend(pics)
-                
+
                 # 检查图像后的文本内容
                 if (
-                    tag_name == "p"
-                    and element.find(
-                        ".//w:t", namespaces=MsWordDocumentBackend._BLIP_NAMESPACES
-                    )
-                    is not None
+                        tag_name == "p"
+                        and element.find(
+                    ".//w:t", namespaces=MsWordDocumentBackend._BLIP_NAMESPACES
+                )
+                        is not None
                 ):
                     # 处理文本元素
                     te1 = self._handle_text_elements(element, doc)
                     added_elements.extend(te1)
-                    
+
             # 检查DrawingML元素
             elif drawingml_els:
                 # 如果DOCX到PDF转换器尚未初始化，则获取转换器
                 if (
-                    self.docx_to_pdf_converter is None
-                    and self.docx_to_pdf_converter_init is False
+                        self.docx_to_pdf_converter is None
+                        and self.docx_to_pdf_converter_init is False
                 ):
                     self.docx_to_pdf_converter = get_docx_to_pdf_converter()
                     self.docx_to_pdf_converter_init = True
@@ -473,7 +473,7 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
                 else:
                     # 处理DrawingML元素
                     self._handle_drawingml(doc=doc, drawingml_els=drawingml_els)
-                    
+
             # 检查SDT容器元素，如目录
             elif tag_name == "sdt":
                 # 查找SDT内容元素
@@ -489,13 +489,13 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
                     for p in paragraphs:
                         te = self._handle_text_elements(p, doc)
                         added_elements.extend(te)
-                        
+
             # 检查文本段落元素
             elif tag_name == "p":
                 # 处理文本元素（包括段落属性如"tcPr", "sectPr"等）
                 te = self._handle_text_elements(element, doc)
                 added_elements.extend(te)
-                
+
             # 忽略其他未知元素并记录日志
             else:
                 _log.debug(f"Ignoring element in DOCX with tag: {tag_name}")
@@ -504,7 +504,7 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
         return doc, added_elements
 
     def _str_to_int(
-        self, s: Optional[str], default: Optional[int] = 0
+            self, s: Optional[str], default: Optional[int] = 0
     ) -> Optional[int]:
         """
         将字符串转换为整数。
@@ -541,7 +541,7 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
             return [input_string]
 
     def _get_numId_and_ilvl(
-        self, paragraph: Paragraph
+            self, paragraph: Paragraph
     ) -> tuple[Optional[int], Optional[int]]:
         """
         获取段落的列表编号ID和层级。
@@ -611,7 +611,7 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
         try:
             # 访问文档的编号部分
             if not hasattr(self.docx_obj, "part") or not hasattr(
-                self.docx_obj.part, "package"
+                    self.docx_obj.part, "package"
             ):
                 return False
 
@@ -831,7 +831,7 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
                 continue
 
             if (len(text.strip()) and format != previous_format) or (
-                hyperlink is not None
+                    hyperlink is not None
             ):
                 # 如果非空文本的样式发生变化，则添加前一个组
                 if len(group_text.strip()) > 0:
@@ -867,8 +867,8 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
         """
         # 首先尝试直接从具有顺序相关属性的 w:p 元素获取索引
         if (
-            hasattr(paragraph_element, "getparent")
-            and paragraph_element.getparent() is not None
+                hasattr(paragraph_element, "getparent")
+                and paragraph_element.getparent() is not None
         ):
             parent = paragraph_element.getparent()
             # 获取所有段落兄弟元素
@@ -1002,9 +1002,9 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
         return container_paragraphs
 
     def _handle_textbox_content(
-        self,
-        textbox_elements: list,
-        doc: DoclingDocument,
+            self,
+            textbox_elements: list,
+            doc: DoclingDocument,
     ) -> list[RefItem]:
         """
         处理文本框内容并将其添加到文档结构中。
@@ -1113,8 +1113,8 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
             return text, []
 
         if (
-            re.sub(r"\s+", "", "".join(only_texts)).strip()
-            != re.sub(r"\s+", "", text).strip()
+                re.sub(r"\s+", "", "".join(only_texts)).strip()
+                != re.sub(r"\s+", "", text).strip()
         ):
             # 如果我们无法重构初始原始文本
             # 不要尝试解析公式并返回原始文本
@@ -1140,11 +1140,11 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
         return output_text, only_equations
 
     def _create_or_reuse_parent(
-        self,
-        *,
-        doc: DoclingDocument,
-        prev_parent: Optional[NodeItem],
-        paragraph_elements: list,
+            self,
+            *,
+            doc: DoclingDocument,
+            prev_parent: Optional[NodeItem],
+            paragraph_elements: list,
     ) -> Optional[NodeItem]:
         """
         为段落元素创建或重用父级节点。
@@ -1164,9 +1164,9 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
         )
 
     def _handle_text_elements(
-        self,
-        element: BaseOxmlElement,
-        doc: DoclingDocument,
+            self,
+            element: BaseOxmlElement,
+            doc: DoclingDocument,
     ) -> list[RefItem]:
         """
         处理文本元素。
@@ -1200,9 +1200,9 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
 
         # 处理列表
         if (
-            numid is not None
-            and ilevel is not None
-            and p_style_id not in ["Title", "Heading"]
+                numid is not None
+                and ilevel is not None
+                and p_style_id not in ["Title", "Heading"]
         ):
             # 通过检查 numFmt 来确认这是否实际上是编号列表
             is_numbered = self._is_numbered_list(numid, ilevel)
@@ -1218,9 +1218,9 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
             self._update_history(p_style_id, p_level, numid, ilevel)
             return elem_ref
         elif (
-            numid is None
-            and self._prev_numid() is not None
-            and p_style_id not in ["Title", "Heading"]
+                numid is None
+                and self._prev_numid() is not None
+                and p_style_id not in ["Title", "Heading"]
         ):  # 关闭列表
             if self.level_at_new_list:
                 for key in range(len(self.parents)):
@@ -1248,7 +1248,7 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
             style_element = getattr(paragraph.style, "element", None)
             if style_element is not None:
                 is_numbered_style = (
-                    "<w:numPr>" in style_element.xml or "<w:numPr>" in element.xml
+                        "<w:numPr>" in style_element.xml or "<w:numPr>" in element.xml
                 )
             else:
                 is_numbered_style = False
@@ -1257,7 +1257,7 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
 
         elif len(equations) > 0:
             if (paragraph.text is None or len(paragraph.text.strip()) == 0) and len(
-                text
+                    text
             ) > 0:
                 # 独立公式
                 level = self._get_level()
@@ -1361,11 +1361,11 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
         return elem_ref
 
     def _add_heading(
-        self,
-        doc: DoclingDocument,
-        curr_level: Optional[int],
-        text: str,
-        is_numbered_style: bool = False,
+            self,
+            doc: DoclingDocument,
+            curr_level: Optional[int],
+            text: str,
+            is_numbered_style: bool = False,
     ) -> list[RefItem]:
         """
         添加标题。
@@ -1442,12 +1442,12 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
         return elem_ref
 
     def _add_formatted_list_item(
-        self,
-        doc: DoclingDocument,
-        elements: list,
-        marker: str,
-        enumerated: bool,
-        level: int,
+            self,
+            doc: DoclingDocument,
+            elements: list,
+            marker: str,
+            enumerated: bool,
+            level: int,
     ) -> list[RefItem]:
         """
         添加格式化的列表项。
@@ -1501,132 +1501,168 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
         return elem_ref
 
     def _add_list_item(
-        self,
-        *,
-        doc: DoclingDocument,
-        numid: int,
-        ilevel: int,
-        elements: list,
-        is_numbered: bool = False,
+            self,
+            *,
+            doc: DoclingDocument,
+            numid: int,
+            ilevel: int,
+            elements: list,
+            is_numbered: bool = False,
     ) -> list[RefItem]:
         """
-        添加列表项。
+        添加列表项到文档结构中。
+        
+        该方法处理Word文档中的列表逻辑，包括编号列表和项目符号列表，
+        管理列表的层级关系、缩进和计数器。
         
         Args:
-            doc: DoclingDocument 对象
-            numid: 列表编号ID
-            ilevel: 列表层级
-            elements: 元素列表
-            is_numbered: 是否编号
+            doc: DoclingDocument 对象，文档结构的根对象
+            numid: 列表编号ID，Word文档中用于标识列表的唯一ID
+            ilevel: 列表层级，表示当前列表项的缩进级别
+            elements: 元素列表，包含列表项的文本、格式和超链接信息
+            is_numbered: 是否为编号列表（True为编号列表，False为项目符号列表）
             
         Returns:
-            list[RefItem]: 元素引用列表
+            list[RefItem]: 元素引用列表，返回添加的列表项引用
         """
         elem_ref: list[RefItem] = []
         # 此方法始终使用 is_numbered 调用。应正确处理编号列表。
         if not elements:
+            # 如果没有元素，直接返回空引用列表
             return elem_ref
+
+        # 初始化枚举标记为空字符串
         enum_marker = ""
 
+        # 获取当前可用的层级
         level = self._get_level()
+        # 获取上一个处理元素的缩进级别
         prev_indent = self._prev_indent()
-        if self._prev_numid() is None:  # 打开新列表
+
+        # 情况1: 开始一个全新的列表
+        if self._prev_numid() is None:
+            # 记录新列表开始时的层级
             self.level_at_new_list = level
 
-            # 为新编号序列重置计数器
+            # 为新编号序列重置计数器，确保编号从1开始
             self._reset_list_counters_for_new_sequence(numid)
 
+            # 创建一个新的列表组并添加到文档结构中
             list_gr = doc.add_list_group(
                 name="list",
-                parent=self.parents[level - 1],
+                parent=self.parents[level - 1],  # 使用上一层级作为父级
                 content_layer=self.content_layer,
             )
+            # 更新父级节点映射
             self.parents[level] = list_gr
+            # 添加列表组的引用到返回列表
             elem_ref.append(list_gr.get_ref())
 
-            # 如果这是枚举元素，则设置标记和枚举参数。
+            # 设置枚举标记（如果是编号列表）
             if is_numbered:
+                # 获取当前层级的计数器值并格式化为标记
                 counter = self._get_list_counter(numid, ilevel)
-                enum_marker = str(counter) + "."
+                enum_marker = str(counter) + "."  # 编号后添加点号，如 "1.", "2.", 等
             else:
-                enum_marker = ""
+                enum_marker = ""  # 项目符号列表没有数字标记
+
+            # 添加格式化的列表项到文档
             self._add_formatted_list_item(
                 doc, elements, enum_marker, is_numbered, level
             )
+
+        # 情况2: 增加缩进，打开子列表
         elif (
-            self._prev_numid() == numid
-            and self.level_at_new_list is not None
-            and prev_indent is not None
-            and prev_indent < ilevel
-        ):  # 打开缩进列表
+                self._prev_numid() == numid  # 同一个列表
+                and self.level_at_new_list is not None  # 新列表层级已设置
+                and prev_indent is not None  # 上一个缩进级别已知
+                and prev_indent < ilevel  # 当前层级比之前更缩进
+        ):
+            # 为新增的缩进级别创建列表组
             for i in range(
-                self.level_at_new_list + prev_indent + 1,
-                self.level_at_new_list + ilevel + 1,
+                    self.level_at_new_list + prev_indent + 1,  # 从上一个缩进级别之后开始
+                    self.level_at_new_list + ilevel + 1,  # 到当前缩进级别结束
             ):
+                # 为每个新的缩进级别创建列表组
                 list_gr1 = doc.add_list_group(
                     name="list",
-                    parent=self.parents[i - 1],
+                    parent=self.parents[i - 1],  # 使用上一个层级作为父级
                     content_layer=self.content_layer,
                 )
+                # 更新父级节点映射
                 self.parents[i] = list_gr1
+                # 添加列表组的引用到返回列表
                 elem_ref.append(list_gr1.get_ref())
 
             # TODO: 如果这是枚举元素，则设置标记和枚举参数。
             if is_numbered:
+                # 获取当前层级的计数器值并格式化为标记
                 counter = self._get_list_counter(numid, ilevel)
                 enum_marker = str(counter) + "."
             else:
                 enum_marker = ""
+
+            # 添加格式化的列表项到文档，使用调整后的层级
             self._add_formatted_list_item(
                 doc,
                 elements,
                 enum_marker,
                 is_numbered,
-                self.level_at_new_list + ilevel,
+                self.level_at_new_list + ilevel,  # 使用调整后的层级
             )
+
+        # 情况3: 减少缩进，关闭子列表
         elif (
-            self._prev_numid() == numid
-            and self.level_at_new_list is not None
-            and prev_indent is not None
-            and ilevel < prev_indent
-        ):  # 关闭列表
+                self._prev_numid() == numid  # 同一个列表
+                and self.level_at_new_list is not None  # 新列表层级已设置
+                and prev_indent is not None  # 上一个缩进级别已知
+                and ilevel < prev_indent  # 当前层级比之前更少缩进
+        ):
+            # 清理不需要的父级节点（关闭更深层级的列表）
             for k in self.parents:
                 if k > self.level_at_new_list + ilevel:
-                    self.parents[k] = None
+                    self.parents[k] = None  # 设置为None表示该层级不再活跃
 
-            # TODO: 如果这是枚举元素，则设置标记和枚举参数。
+            # 设置当前层级的枚举标记
             if is_numbered:
                 counter = self._get_list_counter(numid, ilevel)
                 enum_marker = str(counter) + "."
             else:
                 enum_marker = ""
+
+            # 添加格式化的列表项到文档
             self._add_formatted_list_item(
                 doc,
                 elements,
                 enum_marker,
                 is_numbered,
-                self.level_at_new_list + ilevel,
+                self.level_at_new_list + ilevel,  # 使用调整后的层级
             )
 
+        # 情况4: 同级列表项（相同缩进）
         elif self._prev_numid() == numid or prev_indent == ilevel:
-            # 如果这是枚举元素，则设置标记和枚举参数。
+            # 设置当前层级的枚举标记
             if is_numbered:
                 counter = self._get_list_counter(numid, ilevel)
-                enum_marker = str(counter) + "."
+                enum_marker = str(counter) + "."  # 为编号列表生成标记
             else:
-                enum_marker = ""
+                enum_marker = ""  # 项目符号列表没有数字标记
+
+            # 添加格式化的列表项到文档，使用上一层级
             self._add_formatted_list_item(
                 doc, elements, enum_marker, is_numbered, level - 1
             )
+
+        # 返回添加的元素引用列表
         return elem_ref
 
     @staticmethod
     def _group_cell_elements(
-        group_name: str,
-        doc: DoclingDocument,
-        provs_in_cell: list[RefItem],
-        docling_table: TableItem,
-        content_layer: ContentLayer = ContentLayer.BODY,
+            group_name: str,
+            doc: DoclingDocument,
+            provs_in_cell: list[RefItem],
+            docling_table: TableItem,
+            content_layer: ContentLayer = ContentLayer.BODY,
     ) -> RefItem:
         """
         将单元格中的元素分组。
@@ -1658,9 +1694,9 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
         return ref_for_rich_cell
 
     def _handle_tables(
-        self,
-        element: BaseOxmlElement,
-        doc: DoclingDocument,
+            self,
+            element: BaseOxmlElement,
+            doc: DoclingDocument,
     ) -> list[RefItem]:
         """
         处理表格。
@@ -1793,7 +1829,7 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
             if self.blip_xpath_expr(item):
                 return True
             if item.findall(
-                ".//w:drawing", namespaces=MsWordDocumentBackend._BLIP_NAMESPACES
+                    ".//w:drawing", namespaces=MsWordDocumentBackend._BLIP_NAMESPACES
             ):
                 return True
 
@@ -1857,7 +1893,7 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
         return False
 
     def _handle_pictures(
-        self, drawing_blip: Any, doc: DoclingDocument
+            self, drawing_blip: Any, doc: DoclingDocument
     ) -> list[RefItem]:
         """
         处理图片。
@@ -1869,6 +1905,7 @@ class MsWordDocumentBackend(DeclarativeDocumentBackend):
         Returns:
             list[RefItem]: 元素引用列表
         """
+
         def get_docx_image(drawing_blip: Any) -> Optional[bytes]:
             """
             获取 DOCX 图像数据。
